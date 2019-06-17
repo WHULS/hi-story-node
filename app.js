@@ -1,44 +1,35 @@
-const path = require('path');
-const bodyParser = require('body-parser');
+﻿require('colors');
 const express = require('express');
-require('colors');
 const app = express();
+const router = require('./services.js');
 
-const router = require('./router');
-
-// 添加响应头信息，安全性认证时需要用到
-app.use("*", (req, res, next) => {
+// 请求信息 及 安全性控件
+app.use( (req, res, next) => {
   console.log(req.method.toString().green + ' - ' + // GET or POST
     req.originalUrl.toString().yellow + ' - ' +     // URL
     new Date().toLocaleString().blue);              // Date and Time
-
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header("Access-Control-Allow-Headers", "Content-Type,Content-Length, Authorization, Accept,X-Requested-With");
-  res.header("Access-Control-Allow-Methods", "PUT,POST,GET,DELETE,OPTIONS");
+  
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
   next();
 });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+// For parsing request body
+app.use(express.json());
 
-// 静态目录
-app.use(express.static('../public'));
-app.use('/image', express.static('./images'));
+// Static path
+app.use(express.static('./public'));
 
-app.use('/', router);
+// Request router
+app.use('/api', router);
 
-// app.get('/', (req, res) => {
-//   console.log('GET ' + req.originalUrl + ' - ' + new Date().toLocaleString());
-//   res.redirect('/pages/daily');
-// });
-
-// 监听
-const server = app.listen(80, '0.0.0.0', () => {
-  // 端口号
+// Listening
+const server = app.listen(8888, '0.0.0.0', () => {
+  // Port Number
   let port = server.address().port;
-  // 获取 IPv4
+  // IPv4 address
   let IPv4 = new String();
   let netLinks = require('os').networkInterfaces();
   for(let i in netLinks) {

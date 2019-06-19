@@ -1,4 +1,5 @@
 const router = require('express').Router();
+const S = require('simplebig');
 
 // Connect MySQL
 const mysql = require('mysql');
@@ -40,6 +41,7 @@ router.post('/search-people', (req, res) => {
     }
 
     let sqlstr = 'SELECT `c_personid`, `c_name`, `c_name_chn`, `event_number` FROM biog_main WHERE c_name_chn LIKE ? OR c_name LIKE ? ORDER BY `c_name`';
+    params.nameString = S.s2t(params.namestr);
     let namestr = '%' + params.nameString.split('').join('%') + '%';
     conn.query(sqlstr, [namestr, namestr], (err, results) => {
       if (err) {
@@ -88,12 +90,12 @@ router.post('/people-information', (req, res) => {
       }
 
       res.status(200).json({
-        results: results
+        results: results[0]
       });
     });
     
     conn.release();
   });
-})
+});
 
 module.exports = router;

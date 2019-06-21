@@ -136,45 +136,49 @@ const query = {
   },
   sql_select_PersonPostings: () => {
     return "SELECT " +
-    "  posted_to_addr_data.c_office_id AS OfficeId, " +
+    "	posted_to_addr_data.c_office_id AS OfficeId, " +
     "  office_codes.c_office_chn AS OfficeName, " +
     "  posted_to_addr_data.c_addr_id AS AddrId, " +
     "  addr_codes.c_name_chn AS AddrName, " +
-    "     " +
+    "	  " +
     "  posted_to_office_data.c_firstyear AS FirstYear, " +
     "  n1.c_nianhao_chn AS FirstYearNianhao, " +
     "  posted_to_office_data.c_fy_nh_year AS FirstYearNiaohaoYear, " +
-    "  posted_to_office_data.c_fy_range AS FirstYearRange, " +
-    "   " +
+    "  y1.c_range_chn AS FirstYearRange, " +
+    "	 " +
     "  posted_to_office_data.c_lastyear AS LastYear, " +
     "  n2.c_nianhao_chn AS LastYearNianhao, " +
     "  posted_to_office_data.c_ly_nh_year AS LastYearNianhaoYear, " +
-    "  posted_to_office_data.c_ly_range AS LastYearRange, " +
-    "   " +
+    "  y2.c_range_chn AS LastYearRange, " +
+    "	 " +
     "  appointment_type_codes.c_appt_type_desc_chn AS ChuShouType, " +
     "  text_codes.c_title_chn AS Source, " +
     "  posted_to_office_data.c_pages AS Pages, " +
     "  posted_to_office_data.c_notes AS Notes " +
     "FROM " +
-    "  posting_data " +
-    "  INNER JOIN posted_to_addr_data " +
-    "  INNER JOIN posted_to_office_data  " +
-    "  INNER JOIN office_codes " +
-    "  INNER JOIN addr_codes " +
-    "  INNER JOIN nian_hao AS n1 " +
-    "  INNER JOIN nian_hao AS n2 " +
-    "  INNER JOIN text_codes " +
-    "  INNER JOIN appointment_type_codes " +
+    "	posting_data " +
+    "	INNER JOIN posted_to_addr_data " +
+    "	INNER JOIN posted_to_office_data  " +
+    "	INNER JOIN office_codes " +
+    "	INNER JOIN addr_codes " +
+    "	INNER JOIN nian_hao AS n1 " +
+    "	INNER JOIN nian_hao AS n2 " +
+    "	INNER JOIN text_codes " +
+    "	INNER JOIN appointment_type_codes " +
+    "	INNER JOIN year_range_codes AS y1 " +
+    "	INNER JOIN year_range_codes AS y2 " +
     "WHERE " +
-    "  posting_data.c_personid = ? " +
-    "  AND posting_data.c_posting_id = posted_to_addr_data.c_posting_id  " +
-    "  AND posting_data.c_posting_id = posted_to_office_data.c_posting_id " +
-    "  AND posted_to_office_data.c_office_id = office_codes.c_office_id " +
-    "  AND posted_to_addr_data.c_addr_id = addr_codes.c_addr_id " +
-    "  AND posted_to_office_data.c_fy_nh_code = n1.c_nianhao_id " +
-    "  AND posted_to_office_data.c_ly_nh_code = n2.c_nianhao_id " +
-    "  AND posted_to_office_data.c_source = text_codes.c_textid " +
-    "  AND appointment_type_codes.c_appt_type_code = posted_to_office_data.c_appt_type_code ";
+    "	posting_data.c_personid = ? " +
+    "	AND posting_data.c_posting_id = posted_to_addr_data.c_posting_id  " +
+    "	AND posting_data.c_posting_id = posted_to_office_data.c_posting_id " +
+    "	AND posted_to_office_data.c_office_id = office_codes.c_office_id " +
+    "	AND posted_to_addr_data.c_addr_id = addr_codes.c_addr_id " +
+    "	AND posted_to_office_data.c_fy_nh_code = n1.c_nianhao_id " +
+    "	AND posted_to_office_data.c_ly_nh_code = n2.c_nianhao_id " +
+    "	AND posted_to_office_data.c_source = text_codes.c_textid " +
+    "	AND appointment_type_codes.c_appt_type_code = posted_to_office_data.c_appt_type_code " +
+    "	AND posted_to_office_data.c_fy_range = y1.c_range_code " +
+    "	AND posted_to_office_data.c_ly_range = y2.c_range_code ";
   },
   sql_select_PersonSocialStatus: () => {
     return "SELECT " +
@@ -193,7 +197,7 @@ const query = {
     "  kin_data.c_kin_id AS KinPersonId, " +
     "  biog_main.c_name_chn AS KinPersonName, " +
     "  kin_data.c_kin_code AS KinCode, " +
-    "  kinship_codes.c_kinrel_chn AS KinRel, " +
+    "  kinship_codes.c_kinrel AS KinRel, " +
     "  kinship_codes.c_kinrel_chn AS KinRelName, " +
     "  text_codes.c_title_chn AS Source, " +
     "  kin_data.c_pages AS Pages, " +
@@ -237,17 +241,33 @@ const query = {
     "  text_codes.c_title_chn AS TextName, " +
     "  text_codes.c_text_year AS `Year`, " +
     "  text_role_codes.c_role_desc_chn AS Role, " +
-    "  text_codes.c_title_chn AS Source, " +
+    "  source_text.c_title_chn AS Source, " +
     "  text_data.c_pages AS Pages, " +
-    "  text_data.c_notes AS Notes  " +
+    "  text_data.c_notes AS Notes " +
     "FROM " +
     "  text_data " +
     "  INNER JOIN text_codes " +
-    "  INNER JOIN text_role_codes  " +
+    "  INNER JOIN text_role_codes " +
+    "  INNER JOIN text_codes AS source_text " +
     "WHERE " +
     "  text_data.c_personid = ? " +
     "  AND text_codes.c_textid = text_data.c_textid  " +
-    "  AND text_data.c_role_id = text_role_codes.c_role_id ";
+    "  AND text_data.c_role_id = text_role_codes.c_role_id " +
+    "  AND source_text.c_textid = text_codes.c_source ";
+  },
+  sql_select_PersonEvents: () => {
+    return "SELECT " +
+    "	`events`.PERSON_ID, " +
+    "	`events`.`EVENT`, " +
+    "	`events`.`YEAR`, " +
+    "	`events`.ANCIENT_PLACE, " +
+    "	`events`.MODERN_PLACE, " +
+    "	`events`.LON, " +
+    "	`events`.LAT  " +
+    "FROM " +
+    "	`events`  " +
+    "WHERE " +
+    "	PERSON_ID = ?";
   }
 }
 

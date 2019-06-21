@@ -43,8 +43,8 @@ router.post('/search-people', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_PeopleList;
-    params.nameString = S.s2t(params.namestr);
+    let sqlstr = query.sql_select_PeopleList();
+    params.nameString = S.s2t(params.nameString);
     let namestr = '%' + params.nameString.split('').join('%') + '%';
     conn.query(sqlstr, [namestr, namestr], (err, results) => {
       if (err) {
@@ -85,7 +85,7 @@ router.post('/person-information', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_BasicInformation;
+    let sqlstr = query.sql_select_BasicInformation();
     conn.query(sqlstr, params.c_personid, (err, results) => {
       if (err) {
         res.status(500).json({
@@ -108,7 +108,7 @@ router.post('/person-information', (req, res) => {
  * @request `c_personid`
  * @response Array of {`Source`, `Pages`, `Notes`}
  */
-router.post('/person-information-source', (req, res) => {
+router.post('/person-information-sources', (req, res) => {
   let params = req.body;
 
   if (params.c_personid === undefined) {
@@ -125,7 +125,7 @@ router.post('/person-information-source', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_PersonSources;
+    let sqlstr = query.sql_select_PersonSources();
     conn.query(sqlstr, params.c_personid, (err, results) => {
       if (err) {
         res.status(500).json({
@@ -165,7 +165,7 @@ router.post('/person-aliases', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_PersonAliases;
+    let sqlstr = query.sql_select_PersonAliases();
     conn.query(sqlstr, params.c_personid, (err, results) => {
       if (err) {
         res.status(500).json({
@@ -205,7 +205,7 @@ router.post('/person-addresses', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_PersonAddresses;
+    let sqlstr = query.sql_select_PersonAddresses();
     conn.query(sqlstr, params.c_personid, (err, results) => {
       if (err) {
         res.status(500).json({
@@ -245,7 +245,7 @@ router.post('/person-entry', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_PersonEntryInfo;
+    let sqlstr = query.sql_select_PersonEntryInfo();
     conn.query(sqlstr, params.c_personid, (err, results) => {
       if (err) {
         res.status(500).json({
@@ -285,7 +285,7 @@ router.post('/person-postings', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_PersonPostings;
+    let sqlstr = query.sql_select_PersonPostings();
     conn.query(sqlstr, params.c_personid, (err, results) => {
       if (err) {
         res.status(500).json({
@@ -325,7 +325,7 @@ router.post('/person-social-status', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_PersonSocialStatus;
+    let sqlstr = query.sql_select_PersonSocialStatus();
     conn.query(sqlstr, params.c_personid, (err, results) => {
       if (err) {
         res.status(500).json({
@@ -365,7 +365,7 @@ router.post('/person-kinship', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_PersonKinshipInfo;
+    let sqlstr = query.sql_select_PersonKinshipInfo();
     conn.query(sqlstr, params.c_personid, (err, results) => {
       if (err) {
         res.status(500).json({
@@ -405,7 +405,7 @@ router.post('/person-association', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_PersonSocialAssociation;
+    let sqlstr = query.sql_select_PersonSocialAssociation();
     conn.query(sqlstr, params.c_personid, (err, results) => {
       if (err) {
         res.status(500).json({
@@ -445,7 +445,7 @@ router.post('/person-works', (req, res) => {
       throw error;
     }
 
-    let sqlstr = query.sql_select_PersonWorks;
+    let sqlstr = query.sql_select_PersonWorks();
     conn.query(sqlstr, params.c_personid, (err, results) => {
       if (err) {
         res.status(500).json({
@@ -463,5 +463,44 @@ router.post('/person-works', (req, res) => {
   });
 });
 
+/**
+ * Get person events
+ * @request `c_personid`
+ * @response Array
+ */
+router.post('/person-events', (req, res) => {
+  let params = req.body;
+
+  if (params.c_personid === undefined) {
+    let msg = 'c_personid is undefined';
+    res.status(500).json({
+      msg: msg
+    });
+    throw msg;
+  }
+
+  poolCluster.getConnection('hi_story', (error, conn) => {
+    if (error) {
+      res.status(500);
+      throw error;
+    }
+
+    let sqlstr = query.sql_select_PersonEvents();
+    conn.query(sqlstr, params.c_personid, (err, results) => {
+      if (err) {
+        res.status(500).json({
+          msg: err
+        });
+        throw err;
+      }
+
+      res.status(200).json({
+        results: results
+      });
+    });
+    
+    conn.release();
+  });
+});
 
 module.exports = router;
